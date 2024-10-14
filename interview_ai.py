@@ -7,8 +7,11 @@ import json
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
-def analyze_previous_interviews(user_id):
-    previous_interviews = Interview.query.filter_by(user_id=user_id).all()
+def analyze_previous_interviews(user_id=None):
+    if user_id:
+        previous_interviews = Interview.query.filter_by(user_id=user_id).all()
+    else:
+        previous_interviews = Interview.query.all()
     all_data = [json.loads(interview.data) for interview in previous_interviews]
     
     # Identify missing data points
@@ -27,7 +30,7 @@ def analyze_previous_interviews(user_id):
     
     return missing_data
 
-def conduct_interview(participant_type, user_id):
+def conduct_interview(participant_type, user_id=None):
     missing_data = analyze_previous_interviews(user_id)
     
     prompt = f"""

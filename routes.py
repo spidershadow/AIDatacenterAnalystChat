@@ -12,58 +12,62 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 @app.route('/')
-@login_required
 def index():
-    return redirect(url_for('dashboard'))
+    return render_template('interview.html')
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/admin')
+@login_required
+def admin():
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
     if request.method == 'POST':
         user = User.query.filter_by(username=request.form['username']).first()
         if user and user.check_password(request.form['password']):
             login_user(user)
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('admin_dashboard'))
         flash('Invalid username or password', 'error')
     return render_template('login.html')
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
+@app.route('/admin/register', methods=['GET', 'POST'])
+def admin_register():
     if request.method == 'POST':
         user = User(username=request.form['username'], email=request.form['email'])
         user.set_password(request.form['password'])
         db.session.add(user)
         db.session.commit()
         flash('Registration successful. Please log in.', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('admin_login'))
     return render_template('register.html')
 
-@app.route('/logout')
+@app.route('/admin/logout')
 @login_required
-def logout():
+def admin_logout():
     logout_user()
-    return redirect(url_for('login'))
+    return redirect(url_for('admin_login'))
 
-@app.route('/dashboard')
+@app.route('/admin/dashboard')
 @login_required
-def dashboard():
+def admin_dashboard():
     interviews = Interview.query.filter_by(user_id=current_user.id).all()
     return render_template('dashboard.html', interviews=interviews)
 
 @app.route('/interview', methods=['GET', 'POST'])
-@login_required
 def interview():
     if request.method == 'POST':
         participant_type = request.form['participant_type']
         company_name = request.form['company_name']
         
         try:
-            interview_data = conduct_interview(participant_type, current_user.id)
+            user_id = current_user.id if current_user.is_authenticated else None
+            interview_data = conduct_interview(participant_type, user_id)
             
             new_interview = Interview(
                 participant_type=participant_type,
                 company_name=company_name,
                 interview_date=datetime.utcnow(),
-                user_id=current_user.id,
+                user_id=user_id,
                 data=interview_data,
                 completed=True
             )
@@ -72,14 +76,14 @@ def interview():
             db.session.commit()
             
             flash('Interview conducted successfully!', 'success')
-            return redirect(url_for('dashboard'))
+            return redirect(url_for('index'))
         except Exception as e:
             app.logger.error(f"Error during interview: {str(e)}")
             flash('An error occurred while conducting the interview. Please try again.', 'error')
     
     return render_template('interview.html')
 
-@app.route('/api/interview_data')
+@app.route('/admin/api/interview_data')
 @login_required
 def get_interview_data():
     interviews = Interview.query.filter_by(user_id=current_user.id).all()
@@ -96,7 +100,7 @@ def get_interview_data():
     ]
     return jsonify(data)
 
-@app.route('/insights')
+@app.route('/admin/insights')
 @login_required
 def insights():
     correlated_insights = get_correlated_insights()
