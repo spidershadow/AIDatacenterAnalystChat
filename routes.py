@@ -89,7 +89,7 @@ def get_interview_data():
             'participant_type': interview.participant_type,
             'company_name': interview.company_name,
             'interview_date': interview.interview_date.isoformat(),
-            'data': interview.data,
+            'data': json.loads(interview.data),
             'completed': interview.completed
         }
         for interview in interviews

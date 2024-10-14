@@ -22,7 +22,7 @@ def analyze_previous_interviews(user_id):
     
     for data in all_data:
         for category in missing_data.keys():
-            if not data.get(category):
+            if not data.get(category) or len(data[category]) < 2:
                 missing_data[category].add(category)
     
     return missing_data
@@ -41,6 +41,8 @@ def conduct_interview(participant_type, user_id):
     
     Additionally, focus on the following missing data points from previous interviews:
     {', '.join([f"{k.replace('_', ' ').title()}" for k, v in missing_data.items() if v])}
+    
+    For these missing data points, ask more detailed and specific questions to gather comprehensive information.
     
     Provide the response in a structured JSON format with these categories.
     """
