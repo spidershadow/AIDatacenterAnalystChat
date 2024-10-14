@@ -54,7 +54,7 @@ def interview():
         participant_type = request.form['participant_type']
         company_name = request.form['company_name']
         
-        interview_data = conduct_interview(participant_type)
+        interview_data = conduct_interview(participant_type, current_user.id)
         
         new_interview = Interview(
             participant_type=participant_type,
