@@ -2,7 +2,7 @@ from flask import render_template, request, redirect, url_for, jsonify, flash
 from flask_login import login_user, login_required, logout_user, current_user
 from app import app, db, login_manager
 from models import User, Interview
-from interview_ai import conduct_interview
+from interview_ai import conduct_interview, analyze_previous_interviews
 from correlation_engine import get_correlated_insights
 from datetime import datetime
 import json
@@ -61,7 +61,15 @@ def interview():
         
         try:
             user_id = current_user.id if current_user.is_authenticated else None
+            
+            # Log missing data points before the interview
+            missing_data_before = analyze_previous_interviews(user_id)
+            app.logger.info(f"Missing data points before interview: {missing_data_before}")
+            
             interview_data = conduct_interview(participant_type, user_id)
+            
+            # Log the interview data to verify dynamic adjustment
+            app.logger.info(f"Interview data: {interview_data}")
             
             new_interview = Interview(
                 participant_type=participant_type,
@@ -74,6 +82,10 @@ def interview():
             
             db.session.add(new_interview)
             db.session.commit()
+            
+            # Log missing data points after the interview
+            missing_data_after = analyze_previous_interviews(user_id)
+            app.logger.info(f"Missing data points after interview: {missing_data_after}")
             
             flash('Interview conducted successfully!', 'success')
             return redirect(url_for('index'))
