@@ -47,9 +47,12 @@ def interview():
             
             flash('Interview conducted successfully!', 'success')
             return redirect(url_for('dashboard'))
-        except Exception as e:
+        except ValueError as e:
             app.logger.error(f"Error during interview: {str(e)}")
-            flash('An error occurred while conducting the interview. Please try again.', 'error')
+            flash(str(e), 'error')
+        except Exception as e:
+            app.logger.error(f"Unexpected error during interview: {str(e)}")
+            flash('An unexpected error occurred while conducting the interview. Please try again.', 'error')
     
     return render_template('interview.html')
 
