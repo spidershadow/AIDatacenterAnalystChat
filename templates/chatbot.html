@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">AI Datacenter Analyst Chatbot</h2>
+    <div id="chat-container" class="border rounded p-3 mb-3" style="height: 400px; overflow-y: auto;">
+        <div class="chat-message">
+            <strong>Chatbot:</strong> Hello! I'm your AI Datacenter Analyst. How can I assist you today?
+        </div>
+    </div>
+    <form id="chat-form">
+        <div class="input-group">
+            <input type="text" id="user-input" class="form-control" placeholder="Type your question here...">
+            <button type="submit" class="btn btn-primary">Send</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('chat-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var userInput = document.getElementById('user-input');
+    var chatContainer = document.getElementById('chat-container');
+
+    if (userInput.value.trim() !== '') {
+        // Add user message to chat
+        chatContainer.innerHTML += '<div class="chat-message"><strong>You:</strong> ' + userInput.value + '</div>';
+
+        // Send request to server
+        fetch('/chatbot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'user_input=' + encodeURIComponent(userInput.value)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Add chatbot response to chat
+            chatContainer.innerHTML += '<div class="chat-message"><strong>Chatbot:</strong> ' + data.response + '</div>';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        })
+        .catch(error => console.error('Error:', error));
+
+        userInput.value = '';
+    }
+});
+</script>
+{% endblock %}

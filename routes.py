@@ -1,8 +1,9 @@
-from flask import render_template, request, redirect, url_for, jsonify, flash
+from flask import render_template, request, redirect, url_for, jsonify, flash, session
 from app import app, db
 from models import Interview
 from interview_ai import conduct_interview, analyze_previous_interviews
 from correlation_engine import get_correlated_insights
+from chatbot import get_chatbot_response, conduct_interview_chat
 from datetime import datetime
 import json
 
@@ -22,13 +23,11 @@ def interview():
         company_name = request.form['company_name']
         
         try:
-            # Log missing data points before the interview
             missing_data_before = analyze_previous_interviews()
             app.logger.info(f"Missing data points before interview: {missing_data_before}")
             
             interview_data = conduct_interview(participant_type)
             
-            # Log the interview data to verify dynamic adjustment
             app.logger.info(f"Interview data: {interview_data}")
             
             new_interview = Interview(
@@ -41,7 +40,6 @@ def interview():
             db.session.add(new_interview)
             db.session.commit()
             
-            # Log missing data points after the interview
             missing_data_after = analyze_previous_interviews()
             app.logger.info(f"Missing data points after interview: {missing_data_after}")
             
@@ -76,3 +74,47 @@ def get_interview_data():
 def insights():
     correlated_insights = get_correlated_insights()
     return render_template('insights.html', insights=correlated_insights)
+
+@app.route('/chatbot', methods=['GET', 'POST'])
+def chatbot():
+    if request.method == 'POST':
+        user_input = request.form['user_input']
+        response = get_chatbot_response(user_input)
+        return jsonify({'response': response})
+    return render_template('chatbot.html')
+
+@app.route('/interview_chat', methods=['GET', 'POST'])
+def interview_chat():
+    if request.method == 'GET':
+        return render_template('interview_chat.html')
+    
+    participant_type = request.form.get('participant_type')
+    company_name = request.form.get('company_name')
+    user_input = request.form.get('user_input')
+
+    if 'interview' not in session:
+        session['interview'] = conduct_interview_chat(participant_type)
+        session['company_name'] = company_name
+        next(session['interview'])  # Initialize the generator
+
+    try:
+        response = session['interview'].send(user_input)
+        
+        if isinstance(response, str):  # Interview is complete
+            new_interview = Interview(
+                participant_type=participant_type,
+                company_name=session['company_name'],
+                data=response,
+                completed=True
+            )
+            db.session.add(new_interview)
+            db.session.commit()
+            session.pop('interview', None)
+            session.pop('company_name', None)
+            return jsonify({'status': 'complete', 'message': 'Interview completed successfully!'})
+        else:
+            return jsonify({'status': 'ongoing', 'message': response['content']})
+    except StopIteration:
+        session.pop('interview', None)
+        session.pop('company_name', None)
+        return jsonify({'status': 'error', 'message': 'Interview ended unexpectedly.'})

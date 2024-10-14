@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">AI Interviewer Chatbot</h2>
+    <div id="chat-container" class="border rounded p-3 mb-3" style="height: 400px; overflow-y: auto;">
+        <div class="chat-message">
+            <strong>AI Interviewer:</strong> Welcome to the AI Datacenter Market interview. Please provide your participant type and company name to begin.
+        </div>
+    </div>
+    <form id="participant-form" class="mb-3">
+        <div class="mb-3">
+            <label for="participant_type" class="form-label">Participant Type</label>
+            <select class="form-select" id="participant_type" name="participant_type" required>
+                <option value="">Select participant type</option>
+                <option value="Chipset Vendor">Chipset Vendor</option>
+                <option value="AI Accelerator Startup">AI Accelerator Startup</option>
+                <option value="Server Vendor">Server Vendor</option>
+                <option value="Hyperscaler">Hyperscaler</option>
+                <option value="Cloud Service Provider">Cloud Service Provider</option>
+                <option value="AI Software Company">AI Software Company</option>
+                <option value="Datacenter Infrastructure Provider">Datacenter Infrastructure Provider</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="company_name" class="form-label">Company Name</label>
+            <input type="text" class="form-control" id="company_name" name="company_name" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Start Interview</button>
+    </form>
+    <form id="chat-form" style="display: none;">
+        <div class="input-group">
+            <input type="text" id="user-input" class="form-control" placeholder="Type your response here...">
+            <button type="submit" class="btn btn-primary">Send</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('participant-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var participantType = document.getElementById('participant_type').value;
+    var companyName = document.getElementById('company_name').value;
+    
+    if (participantType && companyName) {
+        document.getElementById('participant-form').style.display = 'none';
+        document.getElementById('chat-form').style.display = 'block';
+        startInterview(participantType, companyName);
+    }
+});
+
+document.getElementById('chat-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    var userInput = document.getElementById('user-input');
+    var chatContainer = document.getElementById('chat-container');
+
+    if (userInput.value.trim() !== '') {
+        // Add user message to chat
+        chatContainer.innerHTML += '<div class="chat-message"><strong>You:</strong> ' + userInput.value + '</div>';
+
+        // Send request to server
+        fetch('/interview_chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'user_input=' + encodeURIComponent(userInput.value)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'ongoing') {
+                // Add AI interviewer response to chat
+                chatContainer.innerHTML += '<div class="chat-message"><strong>AI Interviewer:</strong> ' + data.message + '</div>';
+            } else if (data.status === 'complete') {
+                chatContainer.innerHTML += '<div class="chat-message"><strong>AI Interviewer:</strong> ' + data.message + '</div>';
+                document.getElementById('chat-form').style.display = 'none';
+            } else {
+                chatContainer.innerHTML += '<div class="chat-message error"><strong>Error:</strong> ' + data.message + '</div>';
+            }
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        })
+        .catch(error => console.error('Error:', error));
+
+        userInput.value = '';
+    }
+});
+
+function startInterview(participantType, companyName) {
+    fetch('/interview_chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'participant_type=' + encodeURIComponent(participantType) + '&company_name=' + encodeURIComponent(companyName)
+    })
+    .then(response => response.json())
+    .then(data => {
+        var chatContainer = document.getElementById('chat-container');
+        chatContainer.innerHTML += '<div class="chat-message"><strong>AI Interviewer:</strong> ' + data.message + '</div>';
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+{% endblock %}
