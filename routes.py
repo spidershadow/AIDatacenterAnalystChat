@@ -4,6 +4,7 @@ from models import Interview
 from interview_ai import conduct_interview, analyze_previous_interviews
 from correlation_engine import get_correlated_insights
 from chatbot import get_chatbot_response, conduct_interview_chat
+from market_model import update_market_model, add_interview_to_model, get_market_model_summary, get_category_data
 from datetime import datetime
 import json
 
@@ -39,6 +40,9 @@ def interview():
             
             db.session.add(new_interview)
             db.session.commit()
+            
+            # Update market model with new interview data
+            add_interview_to_model(new_interview)
             
             missing_data_after = analyze_previous_interviews()
             app.logger.info(f"Missing data points after interview: {missing_data_after}")
@@ -109,6 +113,10 @@ def interview_chat():
             )
             db.session.add(new_interview)
             db.session.commit()
+            
+            # Update market model with new interview data
+            add_interview_to_model(new_interview)
+            
             session.pop('interview', None)
             session.pop('company_name', None)
             return jsonify({'status': 'complete', 'message': 'Interview completed successfully!'})
@@ -118,3 +126,22 @@ def interview_chat():
         session.pop('interview', None)
         session.pop('company_name', None)
         return jsonify({'status': 'error', 'message': 'Interview ended unexpectedly.'})
+
+@app.route('/market_model')
+def market_model():
+    model_summary = get_market_model_summary()
+    return render_template('market_model.html', model_summary=model_summary)
+
+@app.route('/api/market_model/<category>')
+def api_market_model_category(category):
+    category_data = get_category_data(category)
+    return jsonify(category_data)
+
+@app.route('/api/market_model_summary')
+def api_market_model_summary():
+    model_summary = get_market_model_summary()
+    return jsonify(model_summary)
+
+@app.before_request
+def update_model():
+    update_market_model()

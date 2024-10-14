@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">AI Datacenter Market Model</h2>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Market Model Summary
+                </div>
+                <div class="card-body">
+                    <div id="model-summary"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Product Offerings
+                </div>
+                <div class="card-body">
+                    <canvas id="product-offerings-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Market Trends
+                </div>
+                <div class="card-body">
+                    <canvas id="market-trends-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Competitive Landscape
+                </div>
+                <div class="card-body">
+                    <canvas id="competitive-landscape-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Technology Advancements
+                </div>
+                <div class="card-body">
+                    <canvas id="technology-advancements-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/market_model.js') }}"></script>
+{% endblock %}
