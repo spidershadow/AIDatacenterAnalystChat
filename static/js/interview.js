@@ -11,15 +11,31 @@ document.addEventListener('DOMContentLoaded', function() {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
-        .then(data => {
+        .then(response => {
             loadingIndicator.style.display = 'none';
-            window.location.href = '/dashboard';
+            if (response.redirected) {
+                window.location.href = response.url;
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data && data.error) {
+                throw new Error(data.error);
+            }
         })
         .catch(error => {
             console.error('Error:', error);
             loadingIndicator.style.display = 'none';
-            alert('An error occurred during the interview process. Please try again.');
+            const errorMessage = error.message || 'An error occurred during the interview process. Please try again.';
+            const alertElement = document.createElement('div');
+            alertElement.className = 'alert alert-danger alert-dismissible fade show mt-3';
+            alertElement.role = 'alert';
+            alertElement.innerHTML = `
+                ${errorMessage}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            form.insertAdjacentElement('beforebegin', alertElement);
         });
     });
 });

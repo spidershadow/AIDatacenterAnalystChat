@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, jsonify
+from flask import render_template, request, redirect, url_for, jsonify, flash
 from flask_login import login_user, login_required, logout_user, current_user
 from app import app, db, login_manager
 from models import User, Interview
@@ -23,6 +23,7 @@ def login():
         if user and user.check_password(request.form['password']):
             login_user(user)
             return redirect(url_for('dashboard'))
+        flash('Invalid username or password', 'error')
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -32,6 +33,7 @@ def register():
         user.set_password(request.form['password'])
         db.session.add(user)
         db.session.commit()
+        flash('Registration successful. Please log in.', 'success')
         return redirect(url_for('login'))
     return render_template('register.html')
 
@@ -54,21 +56,26 @@ def interview():
         participant_type = request.form['participant_type']
         company_name = request.form['company_name']
         
-        interview_data = conduct_interview(participant_type, current_user.id)
-        
-        new_interview = Interview(
-            participant_type=participant_type,
-            company_name=company_name,
-            interview_date=datetime.utcnow(),
-            user_id=current_user.id,
-            data=interview_data,
-            completed=True
-        )
-        
-        db.session.add(new_interview)
-        db.session.commit()
-        
-        return redirect(url_for('dashboard'))
+        try:
+            interview_data = conduct_interview(participant_type, current_user.id)
+            
+            new_interview = Interview(
+                participant_type=participant_type,
+                company_name=company_name,
+                interview_date=datetime.utcnow(),
+                user_id=current_user.id,
+                data=interview_data,
+                completed=True
+            )
+            
+            db.session.add(new_interview)
+            db.session.commit()
+            
+            flash('Interview conducted successfully!', 'success')
+            return redirect(url_for('dashboard'))
+        except Exception as e:
+            app.logger.error(f"Error during interview: {str(e)}")
+            flash('An error occurred while conducting the interview. Please try again.', 'error')
     
     return render_template('interview.html')
 
