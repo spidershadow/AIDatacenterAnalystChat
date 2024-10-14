@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2 class="mb-4">Dashboard</h2>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Recent Interviews</h3>
+            <ul id="interview-list" class="list-group">
+                <!-- Interview list will be populated by JavaScript -->
+            </ul>
+        </div>
+        <div class="col-md-6">
+            <h3>Market Coverage</h3>
+            <div class="chart-container">
+                <canvas id="participant-chart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

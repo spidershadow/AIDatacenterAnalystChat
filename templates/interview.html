@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4">New Interview</h2>
+        <form id="interview-form" method="POST">
+            <div class="mb-3">
+                <label for="participant_type" class="form-label">Participant Type</label>
+                <select class="form-select" id="participant_type" name="participant_type" required>
+                    <option value="">Select participant type</option>
+                    <option value="Chipset Vendor">Chipset Vendor</option>
+                    <option value="AI Accelerator Startup">AI Accelerator Startup</option>
+                    <option value="Server Vendor">Server Vendor</option>
+                    <option value="Hyperscaler">Hyperscaler</option>
+                    <option value="Cloud Service Provider">Cloud Service Provider</option>
+                    <option value="AI Software Company">AI Software Company</option>
+                    <option value="Datacenter Infrastructure Provider">Datacenter Infrastructure Provider</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="company_name" class="form-label">Company Name</label>
+                <input type="text" class="form-control" id="company_name" name="company_name" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Start Interview</button>
+        </form>
+        <div id="loading-indicator" class="mt-4">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Conducting AI-driven interview... This may take a few moments.</p>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/interview.js') }}"></script>
+{% endblock %}

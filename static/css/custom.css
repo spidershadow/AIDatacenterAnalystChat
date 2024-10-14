@@ -1,0 +1,17 @@
+/* Custom styles to complement Bootstrap */
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.chart-container {
+    max-width: 600px;
+    margin: 20px auto;
+}
+
+#loading-indicator {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
