@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <h2 class="mb-4">Market Insights</h2>
+    {% if insights %}
+        <div class="row">
+            <div class="col-md-6">
+                <h3>Top Market Trends</h3>
+                <ul class="list-group">
+                    {% for trend in insights.market_trends %}
+                        <li class="list-group-item">{{ trend }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h3>Product-Challenge Correlations</h3>
+                <ul class="list-group">
+                    {% for correlation in insights.product_challenge_correlations %}
+                        <li class="list-group-item">{{ correlation }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <h3>Key Players</h3>
+                <ul class="list-group">
+                    {% for player in insights.key_players %}
+                        <li class="list-group-item">{{ player }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h3>Technology Advancements</h3>
+                <ul class="list-group">
+                    {% for advancement in insights.technology_advancements %}
+                        <li class="list-group-item">{{ advancement }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <h3>Market Outlook</h3>
+                <p class="lead">{{ insights.market_outlook }}</p>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            No insights available yet. Please conduct more interviews to generate market insights.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

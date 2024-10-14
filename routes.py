@@ -3,6 +3,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 from app import app, db, login_manager
 from models import User, Interview
 from interview_ai import conduct_interview
+from correlation_engine import get_correlated_insights
 from datetime import datetime
 import json
 
@@ -87,3 +88,9 @@ def get_interview_data():
         for interview in interviews
     ]
     return jsonify(data)
+
+@app.route('/insights')
+@login_required
+def insights():
+    correlated_insights = get_correlated_insights()
+    return render_template('insights.html', insights=correlated_insights)
