@@ -1,3 +1,4 @@
+
 from flask import render_template, request, redirect, url_for, jsonify, flash, session
 from app import app, db
 from models import Interview
@@ -41,7 +42,6 @@ def interview():
             db.session.add(new_interview)
             db.session.commit()
             
-            # Update market model with new interview data
             add_interview_to_model(new_interview)
             
             missing_data_after = analyze_previous_interviews()
@@ -99,12 +99,12 @@ def interview_chat():
     if 'interview' not in session:
         session['interview'] = conduct_interview_chat(participant_type)
         session['company_name'] = company_name
-        next(session['interview'])  # Initialize the generator
+        next(session['interview'])
 
     try:
         response = session['interview'].send(user_input)
         
-        if isinstance(response, str):  # Interview is complete
+        if isinstance(response, str):
             new_interview = Interview(
                 participant_type=participant_type,
                 company_name=session['company_name'],
@@ -114,7 +114,6 @@ def interview_chat():
             db.session.add(new_interview)
             db.session.commit()
             
-            # Update market model with new interview data
             add_interview_to_model(new_interview)
             
             session.pop('interview', None)
@@ -129,18 +128,30 @@ def interview_chat():
 
 @app.route('/market_model')
 def market_model():
-    model_summary = get_market_model_summary()
-    return render_template('market_model.html', model_summary=model_summary)
-
-@app.route('/api/market_model/<category>')
-def api_market_model_category(category):
-    category_data = get_category_data(category)
-    return jsonify(category_data)
+    return render_template('market_model.html')
 
 @app.route('/api/market_model_summary')
 def api_market_model_summary():
     model_summary = get_market_model_summary()
-    return jsonify(model_summary)
+    
+    transformed_summary = {}
+    for category, participants in model_summary.items():
+        transformed_summary[category] = {}
+        for participant, count in participants.items():
+            interviews = Interview.query.filter_by(participant_type=participant).all()
+            data_points = []
+            for interview in interviews:
+                interview_data = json.loads(interview.data)
+                if category in interview_data:
+                    for item in interview_data[category]:
+                        data_points.append({
+                            'value': item,
+                            'date': interview.interview_date.isoformat(),
+                            'company': interview.company_name
+                        })
+            transformed_summary[category][participant] = data_points
+    
+    return jsonify(transformed_summary)
 
 @app.before_request
 def update_model():

@@ -3,17 +3,18 @@ from models import Interview
 import json
 from collections import defaultdict
 from datetime import datetime
+from flask import current_app
 
 class MarketModel:
     def __init__(self):
         self.model = defaultdict(lambda: defaultdict(list))
         self.last_updated = None
-        self.update_model()
 
     def update_model(self):
-        interviews = Interview.query.all()
-        for interview in interviews:
-            self._process_interview(interview)
+        with current_app.app_context():
+            interviews = Interview.query.all()
+            for interview in interviews:
+                self._process_interview(interview)
         self.last_updated = datetime.utcnow()
 
     def _process_interview(self, interview):

@@ -1,60 +1,68 @@
+
 {% extends "base.html" %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4">AI Datacenter Market Model</h2>
+    <h2 class="mb-4">AI Datacenter Market Model Dashboard</h2>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <select id="category-filter" class="form-select">
+                <option value="all">All Categories</option>
+                <option value="product_offerings">Product Offerings</option>
+                <option value="market_trends">Market Trends</option>
+                <option value="competitive_landscape">Competitive Landscape</option>
+                <option value="technology_advancements">Technology Advancements</option>
+                <option value="future_outlook">Future Outlook</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <select id="participant-filter" class="form-select">
+                <option value="all">All Participants</option>
+            </select>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Data Points by Category
+                </div>
+                <div class="card-body">
+                    <canvas id="category-chart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    Data Points by Participant Type
+                </div>
+                <div class="card-body">
+                    <canvas id="participant-chart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-md-12">
             <div class="card mb-4">
                 <div class="card-header">
-                    Market Model Summary
+                    Timeline of Data Points
                 </div>
                 <div class="card-body">
-                    <div id="model-summary"></div>
+                    <canvas id="timeline-chart"></canvas>
                 </div>
             </div>
         </div>
     </div>
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-12">
             <div class="card mb-4">
                 <div class="card-header">
-                    Product Offerings
+                    Data Point Details
                 </div>
                 <div class="card-body">
-                    <canvas id="product-offerings-chart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    Market Trends
-                </div>
-                <div class="card-body">
-                    <canvas id="market-trends-chart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    Competitive Landscape
-                </div>
-                <div class="card-body">
-                    <canvas id="competitive-landscape-chart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
-                    Technology Advancements
-                </div>
-                <div class="card-body">
-                    <canvas id="technology-advancements-chart"></canvas>
+                    <div id="data-point-details" style="max-height: 400px; overflow-y: auto;"></div>
                 </div>
             </div>
         </div>
